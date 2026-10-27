@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum StatutTournoi {
+  INSCRIPTIONS
+  EN_COURS
+  TERMINE
+}
+
+enum StatutPartie {
+  EN_COURS
+  TERMINEE
+}
+
+/// Un tournoi de palet vendéen (systeme suisse).
+model Tournoi {
+  id              Int           @id @default(autoincrement())
+  nom             String
+  date            DateTime      @default(now())
+  nbPartiesMax    Int           @default(5)
+  /// Effectif attendu (2 a 64). Le nombre de terrains en decoule : 2 equipes
+  /// par terrain, soit 32 terrains pour 64 equipes.
+  nbEquipesMax    Int           @default(64)
+  /// Points a atteindre pour gagner une partie (13 au palet vendeen).
+  scoreCible      Int           @default(13)
+  /// Score attribue a l'equipe exempte (elle marque, l'adversaire fictif marque 0).
+  scoreExempt     Int           @default(13)
+  statut          StatutTournoi @default(INSCRIPTIONS)
+  creeLe          DateTime      @default(now())
+
+  equipes Equipe[]
+  parties Partie[]
+}
+
+/// Une equipe inscrite. `numero` est son identite pendant le tournoi : c'est
+/// lui qui figure sur les tirages. `nom` est libre (nom d'equipe ou prenom nom).
+model Equipe {
+  id        Int     @id @default(autoincrement())
+  tournoiId Int
+  numero    Int
+  nom       String
+  /// Une equipe forfait ne recoit plus d'adversaire aux parties suivantes.
+  forfait   Boolean @default(false)
+
+  tournoi     Tournoi     @relation(fields: [tournoiId], references: [id], onDelete: Cascade)
+  rencontresA Rencontre[] @relation("EquipeA")
+  rencontresB Rencontre[] @relation("EquipeB")
+
+  @@unique([tournoiId, numero])
+  @@index([tournoiId])
+}
+
+/// Une "partie" = un tour du tournoi : toutes les equipes jouent une rencontre.
+model Partie {
+  id        Int          @id @default(autoincrement())
+  tournoiId Int
+  numero    Int
+  statut    StatutPartie @default(EN_COURS)
+  creeLe    DateTime     @default(now())
+
+  tournoi    Tournoi     @relation(fields: [tournoiId], references: [id], onDelete: Cascade)
+  rencontres Rencontre[]
+
+  @@unique([tournoiId, numero])
+  @@index([tournoiId])
+}
+
+/// Une rencontre entre deux equipes. `equipeBId` null = equipe exempte (bye).
+model Rencontre {
+  id        Int  @id @default(autoincrement())
+  partieId  Int
+  /// Numero de table / plaque attribue pour la rencontre.
+  table     Int
+  equipeAId Int
+  equipeBId Int?
+  scoreA    Int?
+  scoreB    Int?
+  /// Vrai quand l'appariement a du reconduire une rencontre deja jouee.
+  revanche  Boolean @default(false)
+
+  partie  Partie  @relation(fields: [partieId], references: [id], onDelete: Cascade)
+  equipeA Equipe  @relation("EquipeA", fields: [equipeAId], references: [id], onDelete: Cascade)
+  equipeB Equipe? @relation("EquipeB", fields: [equipeBId], references: [id], onDelete: Cascade)
+
+  @@index([partieId])
+  @@index([equipeAId])
+  @@index([equipeBId])
+}

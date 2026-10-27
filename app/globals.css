@@ -1,0 +1,417 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+
+  --shell: #111111;
+  --shell-text: #f7f7f7;
+  --shell-muted: #9a9a9a;
+  --shell-active: rgba(255, 255, 255, 0.1);
+  --shell-border: rgba(255, 255, 255, 0.08);
+
+  --bg: #f6f5f5;
+  --surface: #ffffff;
+  --surface-muted: #fafafa;
+  --border: #e8e5e5;
+  --text: #1a1717;
+  --muted: #7a7272;
+  --muted-2: #b0a8a8;
+
+  --accent: #d51f26;
+  --accent-soft: #fbe3e4;
+  --accent-strong: #ab161c;
+  --on-accent: #ffffff;
+
+  --warn: #a8690b;
+  --warn-soft: #fbf0da;
+
+  --pos: #0f8a58;
+  --pos-soft: #e2f7ec;
+
+  --neg: #c53a30;
+  --neg-soft: #fbe6e4;
+
+  --or: #b08324;
+  --or-soft: #fbf2dc;
+
+  --shadow-card: 0 1px 2px rgba(26, 23, 23, 0.05);
+  --shadow-pop: 0 16px 40px -20px rgba(26, 23, 23, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --shell: #0a0a0a;
+    --shell-text: #f2f2f2;
+    --shell-muted: #8a8a8a;
+    --shell-active: rgba(255, 255, 255, 0.08);
+    --shell-border: rgba(255, 255, 255, 0.07);
+
+    --bg: #131111;
+    --surface: #1b1818;
+    --surface-muted: #221e1e;
+    --border: #302a2a;
+    --text: #f2eeee;
+    --muted: #a19797;
+    --muted-2: #6f6666;
+
+    --accent: #ef4b51;
+    --accent-soft: #4a1a1c66;
+    --accent-strong: #f56b70;
+    --on-accent: #1a0607;
+
+    --warn: #d99b34;
+    --warn-soft: #342a1244;
+
+    --pos: #46bd85;
+    --pos-soft: #14301f44;
+
+    --neg: #e4685c;
+    --neg-soft: #34191644;
+
+    --or: #d4a843;
+    --or-soft: #32280f44;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-pop: 0 16px 40px -20px rgba(0, 0, 0, 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --shell: #0a0a0a;
+  --shell-text: #f2f2f2;
+  --shell-muted: #8a8a8a;
+  --shell-active: rgba(255, 255, 255, 0.08);
+  --shell-border: rgba(255, 255, 255, 0.07);
+
+  --bg: #131111;
+  --surface: #1b1818;
+  --surface-muted: #221e1e;
+  --border: #302a2a;
+  --text: #f2eeee;
+  --muted: #a19797;
+  --muted-2: #6f6666;
+
+  --accent: #ef4b51;
+  --accent-soft: #4a1a1c66;
+  --accent-strong: #f56b70;
+  --on-accent: #1a0607;
+
+  --warn: #d99b34;
+  --warn-soft: #342a1244;
+
+  --pos: #46bd85;
+  --pos-soft: #14301f44;
+
+  --neg: #e4685c;
+  --neg-soft: #34191644;
+
+  --or: #d4a843;
+  --or-soft: #32280f44;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-pop: 0 16px 40px -20px rgba(0, 0, 0, 0.7);
+}
+
+@theme inline {
+  --color-shell: var(--shell);
+  --color-shell-text: var(--shell-text);
+  --color-shell-muted: var(--shell-muted);
+  --color-shell-active: var(--shell-active);
+  --color-shell-border: var(--shell-border);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-strong: var(--accent-strong);
+  --color-on-accent: var(--on-accent);
+
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-pos: var(--pos);
+  --color-pos-soft: var(--pos-soft);
+  --color-neg: var(--neg);
+  --color-neg-soft: var(--neg-soft);
+  --color-or: var(--or);
+  --color-or-soft: var(--or-soft);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Feuilles de match et classement imprimes : on masque la navigation et les
+   actions, et on force un rendu clair sur fond blanc. */
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .print-plein {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Affiche de tirage (components/AfficheTirage.tsx) : invisible a l'ecran,
+   seule chose imprimee sur la page d'une partie. Unites en mm : c'est une
+   page A4 portrait, 32 terrains sur deux colonnes de 16. Pas de fond de
+   couleur : les dialogues d'impression ne les rendent pas par defaut, tout
+   passe par les bordures et la graisse. */
+.affiche {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .affiche {
+    display: block;
+    color: #000;
+  }
+
+  .affiche-entete {
+    display: flex;
+    align-items: center;
+    gap: 5mm;
+    margin-bottom: 4mm;
+    padding-bottom: 3mm;
+    border-bottom: 0.6mm solid #000;
+  }
+
+  .affiche-entete img {
+    width: 18mm;
+    height: 18mm;
+  }
+
+  .affiche-titre {
+    font-size: 18pt;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .affiche-sous-titre {
+    margin-top: 1mm;
+    font-size: 12pt;
+  }
+
+  /* Ordre de lecture de haut en bas puis colonne suivante : grid-auto-flow
+     column + grid-template-rows pose en ligne par le composant. */
+  .affiche-terrains {
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: 6mm;
+    row-gap: 1.6mm;
+  }
+
+  .affiche-terrains[data-colonnes="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Terrain | equipe A (numero, nom dessous) | score ou "contre" | equipe B */
+  .affiche-ligne {
+    display: grid;
+    grid-template-columns: 12mm minmax(0, 1fr) 15mm minmax(0, 1fr);
+    align-items: center;
+    column-gap: 1.5mm;
+    min-height: 12.5mm;
+    padding: 0.8mm 1mm 0.8mm 0;
+    border: 0.35mm solid #000;
+    border-radius: 1.5mm;
+    break-inside: avoid;
+  }
+
+  .affiche-equipe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .affiche-terrain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    border-right: 0.35mm solid #000;
+    font-size: 13pt;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .affiche-terrain span {
+    margin-bottom: 0.8mm;
+    font-size: 5.5pt;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .affiche-numero {
+    font-size: 20pt;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .affiche-perdant {
+    color: #8a8a8a;
+  }
+
+  .affiche-nom {
+    max-width: 100%;
+    overflow: hidden;
+    margin-top: 0.6mm;
+    font-size: 7.5pt;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .affiche-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12pt;
+    font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .affiche-score[data-vide] {
+    color: #666;
+    font-size: 8pt;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .affiche-score small {
+    color: #555;
+    font-size: 6pt;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Une seule colonne (16 terrains ou moins) : on profite de la place. */
+  .affiche-terrains[data-colonnes="1"] .affiche-ligne {
+    grid-template-columns: 16mm minmax(0, 1fr) 24mm minmax(0, 1fr);
+    min-height: 16mm;
+  }
+
+  .affiche-terrains[data-colonnes="1"] .affiche-terrain {
+    font-size: 16pt;
+  }
+
+  .affiche-terrains[data-colonnes="1"] .affiche-numero {
+    font-size: 28pt;
+  }
+
+  .affiche-terrains[data-colonnes="1"] .affiche-nom {
+    font-size: 10pt;
+  }
+
+  .affiche-terrains[data-colonnes="1"] .affiche-score {
+    font-size: 16pt;
+  }
+
+  .affiche-exempte {
+    margin-top: 3mm;
+    font-size: 10pt;
+  }
+
+  .affiche-pied {
+    margin-top: 3mm;
+    color: #666;
+    font-size: 7.5pt;
+  }
+
+  /* Page 2 : les equipes par numero, pour qu'un joueur trouve son terrain. */
+  .affiche-index {
+    break-before: page;
+  }
+
+  .affiche-index h2 {
+    margin-bottom: 4mm;
+    padding-bottom: 2mm;
+    border-bottom: 0.6mm solid #000;
+    font-size: 16pt;
+    font-weight: 700;
+  }
+
+  .affiche-index h2 span {
+    margin-left: 3mm;
+    font-size: 12pt;
+    font-weight: 400;
+  }
+
+  /* 3 colonnes : 64 equipes = 22 lignes, et le detail tient sur une ligne. */
+  .affiche-index-grille {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 6mm;
+    row-gap: 1mm;
+  }
+
+  .affiche-index-equipe {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    min-height: 9mm;
+    border-bottom: 0.2mm solid #bbb;
+    break-inside: avoid;
+  }
+
+  .affiche-index-numero {
+    min-width: 10mm;
+    font-size: 15pt;
+    font-weight: 800;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .affiche-index-detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: 8.5pt;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .affiche-index-nom {
+    overflow: hidden;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

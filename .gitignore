@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+dist
+*.log
+.env*
+/data/*.db
+/data/*.db-journal
+/app/generated
+next-env.d.ts
+.DS_Store
+/dist-app/
+/dist-electron/
+/data/sauvegardes/
+*.tsbuildinfo
