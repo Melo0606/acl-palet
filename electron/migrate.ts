@@ -4,6 +4,40 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
+ * Migrations deja appliquees a la base mais absentes de `migrationsDir` : la
+ * base a ete migree par une version plus recente de l application (version
+ * reinstallee plus ancienne, ou base recopiee depuis un autre poste). Liste vide
+ * si la base n existe pas encore ou n est pas lisible.
+ */
+export function migrationsInconnues(dbFilePath: string, migrationsDir: string): string[] {
+  if (!existsSync(dbFilePath)) return [];
+  let appliquees: string[];
+  try {
+    const db = new Database(dbFilePath, { readonly: true, fileMustExist: true });
+    try {
+      const table = db
+        .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = '_prisma_migrations'`)
+        .get();
+      if (!table) return [];
+      appliquees = db
+        .prepare(`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL`)
+        .all()
+        .map((r: unknown) => (r as { migration_name: string }).migration_name);
+    } finally {
+      db.close();
+    }
+  } catch {
+    return [];
+  }
+  const connues = new Set(
+    readdirSync(migrationsDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name),
+  );
+  return appliquees.filter((nom) => !connues.has(nom));
+}
+
+/**
  * Applique les migrations Prisma (fichiers migration.sql sous
  * `migrationsDir`) directement via better-sqlite3, sans dépendre du CLI
  * Prisma à l'exécution. La table `_prisma_migrations` créée/lue est celle du
@@ -56,6 +90,9 @@ export function appliquerMigrations(dbFilePath: string, migrationsDir: string): 
       const sql = readFileSync(sqlPath, "utf-8");
       const checksum = createHash("sha256").update(sql).digest("hex");
 
+      // Pas de transaction autour : les migrations Prisma qui reconstruisent une
+      // table font `PRAGMA foreign_keys=OFF`, sans effet dans une transaction,
+      // et le DROP TABLE effacerait alors en cascade les lignes liees.
       db.exec(sql);
       insert.run(randomUUID(), checksum, nom);
     }

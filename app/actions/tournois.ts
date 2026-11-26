@@ -69,8 +69,31 @@ export async function updateTournoi(id: number, formData: FormData) {
         nbEquipes + " équipes sont déjà inscrites : l'effectif ne peut pas être inférieur.",
       );
     }
+    const nbParties = await prisma.partie.count({ where: { tournoiId: id } });
+    if (nbParties > data.nbPartiesMax) {
+      throw new Error(
+        nbParties + " parties sont déjà tirées : le tournoi ne peut pas en compter moins.",
+      );
+    }
 
-    await prisma.tournoi.update({ where: { id }, data });
+    if (nbParties === 0) {
+      await prisma.tournoi.update({ where: { id }, data });
+    } else {
+      // Tournoi commence : le champ « Victoire a » est desactive, donc absent
+      // du formulaire. Les scores cible et d'exemption restent ceux du tournoi.
+      const { nom, date, nbPartiesMax, nbEquipesMax } = data;
+      // Le nombre de parties a pu changer : le tournoi est termine seulement si
+      // la derniere partie prevue est tiree et entierement saisie.
+      const scoresManquants = await prisma.rencontre.count({
+        where: { partie: { tournoiId: id }, OR: [{ scoreA: null }, { scoreB: null }] },
+      });
+      const statut =
+        nbParties >= nbPartiesMax && scoresManquants === 0 ? "TERMINE" : "EN_COURS";
+      await prisma.tournoi.update({
+        where: { id },
+        data: { nom, date, nbPartiesMax, nbEquipesMax, statut },
+      });
+    }
     revalidatePath(`/tournois/${id}`);
     redirect(`/tournois/${id}`);
   });

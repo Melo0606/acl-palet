@@ -1,6 +1,6 @@
 {
   "name": "acl-palet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -77,11 +77,13 @@
       "oneClick": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "artifactName": "ACL-Palet-Setup-${version}.${ext}"
     }
   },
   "allowScripts": {
     "electron@42.9.0": true,
     "@electron/rebuild@4.2.0": true
-  }
+  },
+  "description": "Gestion de tournoi de palet vendéen au système suisse"
 }

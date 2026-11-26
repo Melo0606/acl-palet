@@ -3,6 +3,19 @@
 Gestion d'un tournoi de palet vendéen au **système suisse** : jusqu'à 64 équipes
 sur 32 terrains, 5 parties, sans jamais rejouer le même duel.
 
+## Installer l'application (Windows)
+
+1. Ouvrir la page [Releases](https://github.com/Melo0606/acl-palet/releases/latest)
+   et télécharger `ACL-Palet-Setup-<version>.exe`.
+2. Lancer le fichier. L'installateur n'est pas signé : Windows affiche
+   « Windows a protégé votre ordinateur » → *Informations complémentaires* →
+   *Exécuter quand même*.
+3. L'application s'installe et s'ouvre ; un raccourci est créé sur le bureau.
+
+Les mises à jour sont proposées automatiquement au démarrage (ou via
+*Aide › Rechercher des mises à jour…*) : elles ne touchent ni aux tournois ni
+aux sauvegardes.
+
 ## Règles implémentées
 
 - **Partie 1** : tirage au sort intégral.
@@ -45,7 +58,8 @@ sert dans l'en-tête, comme favicon et sur les feuilles imprimées.
 ## Démarrer
 
 ```bash
-npm install          # génère aussi le client Prisma
+cp .env.example .env     # chemin de la base de développement
+npm install              # génère aussi le client Prisma
 npx prisma migrate dev   # crée data/acl-palet.db au premier lancement
 npm run dev          # http://localhost:3000
 ```
@@ -58,7 +72,7 @@ Production locale : `npm run build && npm start`.
 npm run dist:win
 ```
 
-Produit `dist-app/ACL Palet Setup <version>.exe` (installateur NSIS en un clic,
+Produit `dist-app/ACL-Palet-Setup-<version>.exe` (installateur NSIS en un clic,
 raccourcis bureau et menu Démarrer). L'application embarque le serveur Next.js
 (`output: standalone`) dans Electron ; `scripts/build-desktop.js` recompile
 `better-sqlite3` pour l'ABI Electron et `electron/migrate.ts` applique les
@@ -66,6 +80,19 @@ migrations Prisma au démarrage sans le CLI.
 
 Les données (`acl-palet.db` et `sauvegardes/`) sont dans
 `%APPDATA%\acl-palet\donnees` — menu *Fichier › Ouvrir le dossier des données*.
+
+### Publier une version
+
+1. Monter la version : `npm version X.Y.Z --no-git-tag-version`.
+2. `npm run dist:win`.
+3. Commit, tag `vX.Y.Z`, puis
+   `gh release create vX.Y.Z dist-app/ACL-Palet-Setup-X.Y.Z.exe --notes "…"`.
+
+L'application installée lit la dernière release du dépôt
+(`electron/mise-a-jour.ts`, sans electron-updater) : elle prend l'asset
+`*Setup*.exe`, vérifie son empreinte SHA-256 fournie par GitHub, puis lance
+l'installateur après sa fermeture. Le dépôt doit rester public, sinon l'API
+GitHub répond 404 et aucune mise à jour n'est proposée.
 
 Après un `dist:win`, `better-sqlite3` reste compilé pour Electron : lancer
 `npm rebuild better-sqlite3` avant de reprendre `npm run dev`.

@@ -4,6 +4,7 @@ out
 dist
 *.log
 .env*
+!.env.example
 /data/*.db
 /data/*.db-journal
 /app/generated

@@ -206,6 +206,15 @@ export async function enregistrerScores(partieId: number, formData: FormData) {
       include: { rencontres: true, tournoi: true },
     });
 
+    // Une partie est figee des que la suivante est tiree : ses resultats ont
+    // servi a l'appariement. L'interface le montre deja, le serveur le garantit.
+    const nbParties = await prisma.partie.count({ where: { tournoiId: partie.tournoiId } });
+    if (partie.numero !== nbParties) {
+      throw new Error(
+        "La partie " + partie.numero + " est verrouillée : une partie suivante a déjà été tirée.",
+      );
+    }
+
     const misesAJour: { id: number; scoreA: number | null; scoreB: number | null }[] = [];
 
     for (const rencontre of partie.rencontres) {
@@ -260,11 +269,12 @@ export async function enregistrerScores(partieId: number, formData: FormData) {
       data: { statut: complete ? "TERMINEE" : "EN_COURS" },
     });
 
-    const nbParties = await prisma.partie.count({ where: { tournoiId: partie.tournoiId } });
-    if (complete && nbParties >= partie.tournoi.nbPartiesMax) {
+    // Derniere partie : le tournoi est termine quand tous ses scores sont
+    // saisis, et repasse en cours si l'on en efface un pour le corriger.
+    if (nbParties >= partie.tournoi.nbPartiesMax) {
       await prisma.tournoi.update({
         where: { id: partie.tournoiId },
-        data: { statut: "TERMINE" },
+        data: { statut: complete ? "TERMINE" : "EN_COURS" },
       });
     }
 
